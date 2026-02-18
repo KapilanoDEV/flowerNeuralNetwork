@@ -20,6 +20,7 @@
     - [In VS Code (Jupyter Notebook)](#in-vs-code-jupyter-notebook)
   - [Cost Function](#cost-function)
   - [Calculus](#calculus)
+  - [Solving the flower problem.](#solving-the-flower-problem)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -382,3 +383,88 @@ You can add a 1/m out front if you like, so you can interpret the cost as the av
 sigma i=1,m 1/m * (model(xi) - yi)^2
 
 Now, not only does this big cost function tell us if some values of w and b are better than others, we can also use it's partial derivative w.r.t w and b to tell us exactly how to change our parameters to find the best fit automatically!
+
+## Solving the flower problem.
+
+Our farmer wants to predict a flowers type, only knowing the width and length of its petal.
+
+Here's what her data looks like:
+
+| length | width | type |
+|---|---|---|
+| 3 | 1.5 | 1 |
+| 2 | 1 | 0 |
+| 4 | 1.5 | 1 |
+| 3 | 1 | 0 |
+| 3.5 | 0.5 | 1 |
+| 2 | 0.5 | 0 |
+| 5.5 | 1 | 1 |
+| 1 | 1 | 0 |
+| 4.5 | 1 | ? |
+
+She wants to predict that last flowers colour, and also end up with a neural network that can classify future flowers!
+
+She has two inputs, so her network will have two inputs, length and width
+
+She has one output, so the network will have one output
+
+It will look like this:
+
+nn(length, width) = sigmoid(w1 * length + w2 * width + b)
+
+She uses sigmoid to squash the values between 0 and 1, since the flowers only have two types, she can consider outputs below .5 to be blue and above .5 to be red.
+
+Let's look at what this network can do already:
+
+We scatter some points on the x-z plane and consider the x-axis our length feature, and the z-axis our width feature.
+
+For each grid point, we feed its coordinates into the network and get an output, that becomes the points y coordinate.
+
+Now, we can play with w1 w2 and b and see what they do!
+
+![match the 3d graph to the data](images/plotted.png)
+
+When we try to predict what the mystery flower is we feed it's length and width in to see what the output is. If it is close to 1, we can predict it is a red flower.
+
+So now we need to train this network instead of playing by hand as in the diagram above.
+
+![3D Neural Network Output](images/coordinates.png)
+
+This 3D visualization shows how the neural network divides the feature space (length and width) into regions that classify flowers as red (output near 1) or blue (output near 0).
+
+
+The training procedure is to pick a random flower from our data, feed in its length and width to the net, and get an output. Then we get the squared error of the output with what it should have been given the data. 
+
+For example, we pick this flower, 2, 1, 0.
+
+We feed in 2, 1 and get out blip.
+
+Because this is a blue flower we want to bring this output lower always.. as close to zero as possible.
+
+Here's what the squared error looks like:
+
+(nn(2,1) - 0)^2
+
+notice that if we replace nn with its definition we just have a function of parameters
+
+cost(w1, w2, b) = (sigmoid(w1*2 + w2 * 1 + b) - 0)^2
+
+We take the partial of the cost w.r.t w1 w2 and b, which will give us three functions:
+
+dcdw1
+dcdw2
+dcdb
+
+which tell us how to change w1 w2 and b to INCREASE the cost.
+
+We want to decrease the cost, so we instead subtract these partials.
+
+Refer to the cost function video in this playlist on why this works if its hazy.
+
+We update our parameters using a fraction of these partials.. and that will bring the output of our net closer to what we wanted it to be!
+
+Now we repeat with a new random flower, and keep going until our networks output looks reasonable.
+
+Because our dataset is so small, we're not going to split our data into train/test which we should usually do. That's something I'll cover in more advanced NN tutorials.
+
+Ok, look at that! The nets output is looking good.
